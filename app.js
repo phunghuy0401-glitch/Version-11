@@ -23,6 +23,7 @@
   let activeLetter = null;
   let youtubePlayer = null;
   let youtubeApiPromise = null;
+  let youtubeRequestToken = 0;
   let selectedMediaFile = null;
   let selectedMediaObjectUrl = '';
   let selectedMediaConfig = null;
@@ -324,51 +325,81 @@
   }
 
   function destroyYoutubePlayer() {
-    if (youtubePlayer && typeof youtubePlayer.destroy === 'function') {
-      try { youtubePlayer.destroy(); } catch (_) { /* The embed may already have been removed. */ }
+  youtubeRequestToken += 1;
+
+  if (youtubePlayer && typeof youtubePlayer.destroy === 'function') {
+    try {
+      youtubePlayer.destroy();
+    } catch (_) {
+      // Trình phát có thể đã bị gỡ.
     }
-    youtubePlayer = null;
   }
 
-  function loadYouTubeApi() {
-    if (window.YT && window.YT.Player) return Promise.resolve(window.YT);
-    if (youtubeApiPromise) return youtubeApiPromise;
+  youtubePlayer = null;
+}
 
-    youtubeApiPromise = new Promise((resolve, reject) => {
-      let finished = false;
-      const timeout = window.setTimeout(() => {
-        if (!finished) {
-          finished = true;
-          reject(new Error('Không tải được YouTube Player API.'));
+ 
+function loadYouTubeApi() {
+  if (window.YT && window.YT.Player) {
+    return Promise.resolve(window.YT);
+  }
+
+  if (youtubeApiPromise) return youtubeApiPromise;
+
+  youtubeApiPromise = new Promise((resolve, reject) => {
+    let finished = false;
+
+    const timeout = window.setTimeout(() => {
+      if (finished) return;
+      finished = true;
+      reject(new Error('Không tải được YouTube Player API.'));
+    }, 14000);
+
+    const previousCallback = window.onYouTubeIframeAPIReady;
+
+    window.onYouTubeIframeAPIReady = () => {
+      try {
+        if (typeof previousCallback === 'function') {
+          previousCallback();
         }
-      }, 14000);
+      } catch (error) {
+        console.warn('YouTube callback cũ gặp lỗi:', error);
+      }
 
-      const previousCallback = window.onYouTubeIframeAPIReady;
-      window.onYouTubeIframeAPIReady = () => {
-        if (typeof previousCallback === 'function') previousCallback();
-        if (finished) return;
+      if (finished) return;
+
+      if (window.YT && window.YT.Player) {
         finished = true;
         window.clearTimeout(timeout);
         resolve(window.YT);
+      }
+    };
+
+    let script = $('script[data-youtube-iframe-api]');
+
+    if (!script) {
+      script = document.createElement('script');
+      script.src = 'https://www.youtube.com/iframe_api';
+      script.async = true;
+      script.dataset.youtubeIframeApi = 'true';
+
+      script.onerror = () => {
+        if (finished) return;
+        finished = true;
+        window.clearTimeout(timeout);
+        reject(new Error('Trình duyệt không tải được trình phát YouTube.'));
       };
 
-      let script = $('script[data-youtube-iframe-api]');
-      if (!script) {
-        script = document.createElement('script');
-        script.src = 'https://www.youtube.com/iframe_api';
-        script.async = true;
-        script.dataset.youtubeIframeApi = 'true';
-        script.onerror = () => {
-          if (finished) return;
-          finished = true;
-          window.clearTimeout(timeout);
-          reject(new Error('Trình duyệt không tải được trình phát YouTube.'));
-        };
-        document.head.append(script);
-      }
-    });
-    return youtubeApiPromise;
-  }
+      document.head.append(script);
+    }
+  }).catch(error => {
+    youtubeApiPromise = null;
+    throw error;
+  });
+
+  return youtubeApiPromise;
+}
+
 
   function applyFileVideo(source, title, caption) {
     destroyYoutubePlayer();
@@ -384,60 +415,110 @@
     setMediaCaption(title, caption || 'Video · Chuyên Hạ Long 19.11');
   }
 
-  async function applyYouTubeVideo(videoId, title, caption) {
-    destroyYoutubePlayer();
-    const host = $('#memoryYoutubeHost');
-    const mount = document.createElement('div');
-    mount.id = 'memoryYoutubePlayer';
-    host.replaceChildren(mount);
-    host.hidden = false;
-    $('#memoryPlayer').pause();
-    $('#memoryPlayer').hidden = true;
-    $('#memoryEmpty').hidden = true;
-    $('#videoFallback').href = `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`;
-    $('#videoFallback').hidden = false;
-    setMediaCaption(title, caption || 'YouTube · Chuyên Hạ Long 19.11');
+  
+async function applyYouTubeVideo(videoId, title, caption) {
+  destroyYoutubePlayer();
 
-    try {
-      const YT = await loadYouTubeApi();
-      if (!host.isConnected || host.hidden || !host.contains(mount)) return;
-      youtubePlayer = new YT.Player(mount, {
-        width: '100%',
-        height: '100%',
-        videoId,
-        host: 'https://www.youtube-nocookie.com',
-        playerVars: {
-          playsinline: 1,
-          rel: 0,
-          modestbranding: 1,
-          origin: window.location.origin === 'null' ? undefined : window.location.origin
-        },
-        events: {
-          onReady: () => {
-            $('#memoryEmpty').hidden = true;
-            $('#videoFallback').hidden = false;
-          },
-          onStateChange: event => {
-            if (event.data === YT.PlayerState.PLAYING) resetFilmInvite();
-            if (event.data === YT.PlayerState.ENDED) handleFilmEnded();
-          },
-          onError: () => {
-            host.hidden = true;
-            $('#memoryEmpty').hidden = false;
-            $('#memoryEmpty small').textContent = 'Không thể phát video nhúng. Bạn có thể mở trực tiếp trên YouTube.';
-            $('#videoFallback').hidden = false;
-            toast('Video YouTube chưa phát được. Hãy kiểm tra quyền xem hoặc mở trực tiếp.');
-          }
-        }
-      });
-    } catch (error) {
-      host.hidden = true;
-      $('#memoryEmpty').hidden = false;
-      $('#memoryEmpty small').textContent = 'Trình phát YouTube chưa tải được. Hãy kiểm tra kết nối mạng.';
-      $('#videoFallback').hidden = false;
-      toast('Không tải được trình phát YouTube.');
+  const requestToken = youtubeRequestToken;
+  const host = $('#memoryYoutubeHost');
+  const mount = document.createElement('div');
+
+  mount.id = 'memoryYoutubePlayer';
+  host.replaceChildren(mount);
+  host.hidden = false;
+
+  $('#memoryPlayer').pause();
+  $('#memoryPlayer').removeAttribute('src');
+  $('#memoryPlayer').load();
+  $('#memoryPlayer').hidden = true;
+
+  $('#memoryEmpty').hidden = true;
+  $('#videoFallback').href =
+    `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`;
+  $('#videoFallback').hidden = false;
+
+  setMediaCaption(
+    title,
+    caption || 'YouTube · Chuyên Hạ Long 19.11'
+  );
+
+  try {
+    const YT = await loadYouTubeApi();
+
+    if (
+      requestToken !== youtubeRequestToken ||
+      !host.isConnected ||
+      host.hidden ||
+      !host.contains(mount)
+    ) {
+      return;
     }
+
+    const player = new YT.Player(mount, {
+      width: '100%',
+      height: '100%',
+      videoId,
+      host: 'https://www.youtube-nocookie.com',
+      playerVars: {
+        playsinline: 1,
+        rel: 0,
+        modestbranding: 1,
+        origin: window.location.origin === 'null'
+          ? undefined
+          : window.location.origin
+      },
+      events: {
+        onReady: event => {
+          if (requestToken !== youtubeRequestToken) {
+            event.target.destroy();
+            return;
+          }
+
+          youtubePlayer = event.target;
+          $('#memoryEmpty').hidden = true;
+          $('#videoFallback').hidden = false;
+        },
+
+        onStateChange: event => {
+          if (requestToken !== youtubeRequestToken) return;
+
+          if (event.data === YT.PlayerState.PLAYING) {
+            resetFilmInvite();
+          }
+
+          if (event.data === YT.PlayerState.ENDED) {
+            handleFilmEnded();
+          }
+        },
+
+        onError: () => {
+          if (requestToken !== youtubeRequestToken) return;
+
+          host.hidden = true;
+          $('#memoryEmpty').hidden = false;
+          $('#memoryEmpty small').textContent =
+            'Không thể phát video nhúng. Bạn có thể mở trực tiếp trên YouTube.';
+
+          $('#videoFallback').hidden = false;
+          toast('Video YouTube chưa phát được. Hãy kiểm tra quyền xem hoặc mở trực tiếp.');
+        }
+      }
+    });
+
+    youtubePlayer = player;
+
+  } catch (error) {
+    if (requestToken !== youtubeRequestToken) return;
+
+    host.hidden = true;
+    $('#memoryEmpty').hidden = false;
+    $('#memoryEmpty small').textContent =
+      'Trình phát YouTube chưa tải được. Hãy kiểm tra kết nối mạng.';
+
+    $('#videoFallback').hidden = false;
+    toast('Không tải được trình phát YouTube.');
   }
+ }
 
   function applyMediaConfig(config) {
     const type = config?.type;
@@ -497,14 +578,30 @@
     return /^[A-Za-z0-9_-]{11}$/.test(id) ? id : '';
   }
 
-  function safeMediaFilename(name) {
-    const original = String(name || 'video.mp4').split(/[\\/]/).pop();
-    const extension = original.includes('.') ? original.split('.').pop().toLowerCase() : 'mp4';
-    const base = original.replace(/\.[^.]+$/, '').normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '').replace(/đ/gi, 'd')
-      .toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '') || 'video-1911';
-    return `${base}.${extension}`;
-  }
+
+function safeMediaFilename(name) {
+  const original = String(name || 'video.mp4').split(/[\\/]/).pop();
+
+  const rawExtension = original.includes('.')
+    ? original.split('.').pop().toLowerCase()
+    : 'mp4';
+
+  const extension = ['mp4', 'webm'].includes(rawExtension)
+    ? rawExtension
+    : 'mp4';
+
+  const base = original
+    .replace(/\.[^.]+$/, '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/gi, 'd')
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'video-1911';
+
+  return `${base}.${extension}`;
+}
+
 
   function prettyBytes(bytes) {
     if (!Number.isFinite(bytes) || bytes <= 0) return '0 MB';
@@ -529,7 +626,7 @@
     const saveButton = $('#saveMediaConfig');
 
     function setMode(mode) {
-      if (state.mediaMode === mode) return;
+      if (!['youtube', 'file'].includes(mode)) return;
       if (state.mediaMode !== mode) {
         if (selectedMediaObjectUrl) resetSelectedFile();
         else setVideoPlaceholder('Chưa chọn nguồn video trong công cụ thiết lập.');
@@ -575,16 +672,24 @@
     const dropZone = $('#mediaDrop');
     const fileFeedback = $('#mediaFileFeedback');
 
-    function resetSelectedFile() {
-      inspectFile.pickToken = (inspectFile.pickToken || 0) + 1;
-      const hadLocalPreview = Boolean(selectedMediaObjectUrl);
-      if (selectedMediaObjectUrl) URL.revokeObjectURL(selectedMediaObjectUrl);
-      if (hadLocalPreview) setVideoPlaceholder('Chưa có video được chọn.');
-      selectedMediaObjectUrl = '';
-      selectedMediaFile = null;
-      selectedMediaConfig = null;
-      saveButton.disabled = true;
-    }
+ 
+function resetSelectedFile() {
+  inspectFile.pickToken = (inspectFile.pickToken || 0) + 1;
+
+  if (selectedMediaObjectUrl) {
+    URL.revokeObjectURL(selectedMediaObjectUrl);
+  }
+
+  selectedMediaObjectUrl = '';
+  selectedMediaFile = null;
+  selectedMediaConfig = null;
+
+  fileInput.value = '';
+  fileFeedback.textContent = '';
+
+  saveButton.disabled = true;
+}
+
 
     function inspectFile(file) {
       resetSelectedFile();
