@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#D1E8FC">
+  <meta name="description" content="19.11 — Một trái tim chung từ 36 lớp Chuyên Hạ Long.">
+  <meta name="color-scheme" content="light">
+  <title>19.11 — Chuyên Hạ Long</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="sky-wash" aria-hidden="true"><span class="sky-glow glow-a"></span><span class="sky-glow glow-b"></span><span class="sky-grain"></span></div>
+
+  <header class="topbar" id="home">
+    <a class="brand" href="#home" aria-label="19.11 Chuyên Hạ Long — về đầu trang">
+      <span class="brand-mark">19</span>
+      <span class="brand-copy"><b>CHUYÊN HẠ LONG</b><small>19 · 11 · 2026</small></span>
+    </a>
+    <a class="top-link" href="#heartArchive">Vườn trái tim <span aria-hidden="true">↘</span></a>
+  </header>
+
+  <main>
+    <section class="intro wrap" id="film" aria-label="Thước phim kỷ niệm">
+      <div class="film-layout">
+        <div class="film-column">
+          <div class="film-card">
+            <div class="film-stage" id="memoryStage">
+              <div class="film-placeholder" id="memoryEmpty">
+                <span class="play-mark" aria-hidden="true"><span></span></span>
+                <b>Thước phim đang chờ được mở</b>
+                <small>Một video · Chuyên Hạ Long 19.11</small>
+              </div>
+              <video id="memoryPlayer" controls playsinline preload="metadata" poster="media/poster-19-11.jpg" hidden aria-label="Thước phim kỷ niệm ngày 19 tháng 11"></video>
+              <div class="memory-youtube-host" id="memoryYoutubeHost" hidden></div>
+              <span class="film-label"><i class="film-label-dot"></i> 19.11 <span>·</span> CHUYÊN HẠ LONG</span>
+              <a class="video-fallback" id="videoFallback" href="#" target="_blank" rel="noopener noreferrer" hidden>Mở video trên YouTube ↗</a>
+            </div>
+            <div class="film-caption">
+              <span class="film-caption-copy"><b id="mediaName">THƯỚC PHIM 19/11</b><small id="mediaMeta">Video kỷ niệm sẽ được cập nhật tại đây.</small></span>
+              <span class="film-index">01 <i>/</i> 01</span>
+            </div>
+          </div>
+        </div>
+
+        <aside class="film-invite" id="filmInvite">
+          <p class="eyebrow"><span class="eyebrow-mark"></span> A SHARED MEMORY · 19.11.2026</p>
+          <h1 id="introTitle">Một thước phim.<br><em>Một thời thanh xuân.</em></h1>
+          <p class="lead">Lời nhắn gửi từ đại gia đình Chuyên Hạ Long.</p>
+          <div class="invite-divider"><span></span><i>✦</i><span></span></div>
+          <p class="invite-overline" id="filmInviteEyebrow">AFTER THE FILM</p>
+          <h2>Còn một điều<br><em>muốn gửi cậu.</em></h2>
+          <p class="invite-copy" id="filmInviteCopy">Những lời nhắn nhỏ đang đợi được mở. Chạm xuống khu vườn và chọn một trái tim nhé.</p>
+          <a class="explore-call" href="#heartArchive">
+            <span class="call-icon" aria-hidden="true">♡</span>
+            <span class="call-copy"><b id="filmInviteAction">Đi đến khu vườn thư</b><small>36 lớp · 36 lời nhắn</small></span>
+            <span class="call-arrow" aria-hidden="true">↗</span>
+          </a>
+          <span class="invite-foot">A LITTLE SURPRISE IS WAITING</span>
+        </aside>
+      </div>
+
+      <!-- Chỉ xuất hiện khi chủ website mở ?media-admin=1. Không hiển thị với khách truy cập. -->
+      <section class="media-admin" id="mediaAdmin" hidden aria-labelledby="mediaAdminTitle">
+        <div class="media-admin-heading">
+          <div>
+            <p class="eyebrow">PRIVATE SETUP · MEDIA TOOLS</p>
+            <h2 id="mediaAdminTitle">Thiết lập thước phim</h2>
+            <p>Chọn nguồn video, kiểm tra trước rồi tải cấu hình phù hợp vào thư mục website.</p>
+          </div>
+          <span class="admin-tag">Chế độ quản trị</span>
+        </div>
+        <div class="media-mode-switch" role="group" aria-label="Chọn nguồn video">
+          <button class="media-mode active" type="button" data-media-mode="youtube" aria-pressed="true"><span>▶</span> YouTube</button>
+          <button class="media-mode" type="button" data-media-mode="file" aria-pressed="false"><span>＋</span> Tệp MP4 / WebM</button>
+        </div>
+        <div class="media-setup-panel" id="youtubeSetup">
+          <label class="media-field-label" for="youtubeUrl">Đường dẫn video YouTube</label>
+          <div class="media-url-row">
+            <input id="youtubeUrl" type="url" inputmode="url" placeholder="https://youtu.be/... hoặc youtube.com/watch?v=..." autocomplete="url">
+            <button class="media-action" id="previewYoutube" type="button">Kiểm tra link</button>
+          </div>
+          <p class="media-help">Hỗ trợ link YouTube thường, youtu.be, Shorts và link nhúng. Video nên để chế độ Công khai hoặc Không công khai.</p>
+        </div>
+        <div class="media-setup-panel" id="fileSetup" hidden>
+          <label class="media-drop" id="mediaDrop" for="mediaFileInput">
+            <input id="mediaFileInput" type="file" accept="video/mp4,video/webm,.mp4,.webm">
+            <span class="media-drop-icon">↑</span>
+            <b>Chọn hoặc thả video vào đây</b>
+            <small>Ưu tiên MP4 · H.264 · 1080p · Tỷ lệ 16:9</small>
+            <span class="media-file-choose">Chọn video từ thiết bị</span>
+          </label>
+          <div class="media-file-feedback" id="mediaFileFeedback" role="status" aria-live="polite">Chưa có tệp video được chọn.</div>
+          <video class="media-local-preview" id="mediaLocalPreview" controls playsinline preload="metadata" hidden></video>
+        </div>
+        <div class="media-admin-bottom">
+          <p class="media-status" id="mediaAdminStatus" role="status" aria-live="polite">Chọn một nguồn video để bắt đầu.</p>
+          <button class="media-save" id="saveMediaConfig" type="button" disabled>Tải cấu hình video</button>
+        </div>
+        <p class="media-admin-note"><b>Lưu ý quan trọng:</b> Trình duyệt có thể kiểm tra và xem thử video trên thiết bị này, nhưng không thể tự tải tệp lên hosting. Với MP4, sau khi tải cấu hình, bạn cần đưa video vào thư mục <code>media/</code> rồi tải cả thư mục website lên hosting. Dùng YouTube sẽ nhẹ hosting hơn.</p>
+      </section>
+    </section>
+
+    <section class="garden wrap" id="heartArchive" aria-labelledby="gardenTitle">
+      <div class="garden-heading-row">
+        <div class="garden-head">
+          <p class="eyebrow"><span class="eyebrow-mark"></span> THE HEART GARDEN · 02</p>
+          <h2 id="gardenTitle">36 lớp, một <em>vườn lời nhắn.</em></h2>
+          <p class="garden-sub">Mỗi tập thể là một trái tim. Chọn lớp để mở lời chúc dành riêng cho mình.</p>
+        </div>
+        <div class="garden-stamp" aria-hidden="true"><b>36</b><span>CLASS<br>MEMORIES</span></div>
+      </div>
+
+      <div class="garden-controls">
+        <div class="grade-switch" role="group" aria-label="Lọc theo khối">
+          <button class="grade-tab active" data-grade="all" type="button" aria-pressed="true">Tất cả <small>36</small></button>
+          <button class="grade-tab" data-grade="10" type="button" aria-pressed="false">Khối 10 <small>12</small></button>
+          <button class="grade-tab" data-grade="11" type="button" aria-pressed="false">Khối 11 <small>12</small></button>
+          <button class="grade-tab" data-grade="12" type="button" aria-pressed="false">Khối 12 <small>12</small></button>
+        </div>
+        <div class="tools-row">
+          <label class="search-box">
+            <span aria-hidden="true">⌕</span>
+            <input id="heartSearch" type="search" placeholder="Tìm lớp, ví dụ: 10 Toán..." autocomplete="off" aria-label="Tìm lớp">
+            <button id="clearSearch" type="button" aria-label="Xóa tìm kiếm" hidden>×</button>
+          </label>
+          <button class="random-button" id="randomLetter" type="button"><span aria-hidden="true">✧</span> Mở ngẫu nhiên</button>
+        </div>
+      </div>
+
+      <div class="grade-intro" id="gradeIntro">
+        <span class="grade-dot all-dot" aria-hidden="true"></span>
+        <span class="grade-intro-copy"><b>36 trái tim</b><small>Ba khối · Một vườn lời chúc</small></span>
+        <span class="result-count" id="resultCount" aria-live="polite" aria-atomic="true">36 lớp</span>
+      </div>
+      <div class="heart-grid" id="heartCanvas" aria-label="36 lớp tương tác"></div>
+      <p class="search-empty" id="searchEmpty" hidden>Không tìm thấy lớp phù hợp. Thử một từ khóa khác nhé.</p>
+      <div class="garden-bottom"><span>36 CLASS COMMUNITIES</span><span>MADE TO BE REMEMBERED <i>✦</i></span></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span class="brand-mark" aria-hidden="true">19</span>
+    <span class="footer-copy"><b>CHUYÊN HẠ LONG</b><small>36 LỚP · MỘT TRÁI TIM</small></span>
+    <a href="#home" class="back-top">Về đầu trang ↑</a>
+  </footer>
+
+  <nav class="mobile-dock" aria-label="Điều hướng nhanh">
+    <a href="#home"><span aria-hidden="true">⌂</span>Trang chủ</a>
+    <a href="#film"><span aria-hidden="true">▶</span>Thước phim</a>
+    <a href="#heartArchive"><span aria-hidden="true">♡</span>Vườn thư</a>
+  </nav>
+
+  <dialog class="letter-dialog" id="letterDialog" aria-labelledby="dialogTitle">
+    <div class="dialog-top">
+      <span class="dialog-chip" id="dialogGrade">KHỐI 10</span>
+      <button class="dialog-close" id="closeDialog" type="button" aria-label="Đóng thư">×</button>
+    </div>
+    <div class="letter-content">
+      <div class="letter-emblem" aria-hidden="true">♡</div>
+      <p class="letter-kicker">A LETTER FOR YOU</p>
+      <h2 id="dialogTitle">10 Toán</h2>
+      <div class="letter-rule"><i></i></div>
+      <div class="letter-tools"><span class="typing-status" id="typingStatus" aria-live="polite"></span></div>
+      <p class="letter-body" id="dialogCopy" aria-live="polite"></p>
+      <span class="letter-date">19 · 11 · 2026 &nbsp; / &nbsp; CHUYÊN HẠ LONG</span>
+      <section class="letter-feedback" aria-label="Phản hồi về lá thư">
+        <h3>Bạn cảm thấy lá thư thế nào, phản hồi cho chúng mình nhaaa</h3>
+        <div class="feedback-options">
+          <button type="button" data-feedback="Dễ thương xỉuu" aria-pressed="false"><span aria-hidden="true">♡</span><b>Dễ thương xỉuu</b></button>
+          <button type="button" data-feedback="Cảm ơn các bạn nữ nhiều nhaa" aria-pressed="false"><span aria-hidden="true">✦</span><b>Cảm ơn các bạn nữ nhiều nhaa</b></button>
+          <button type="button" data-feedback="Được quan tâm thế này thích ghê" aria-pressed="false"><span aria-hidden="true">☀</span><b>Được quan tâm thế này thích ghê</b></button>
+        </div>
+        <small class="feedback-thanks" id="feedbackThanks" aria-live="polite"></small>
+        <small class="feedback-note">Lựa chọn chỉ hiển thị trên thiết bị này; chưa gửi về máy chủ.</small>
+      </section>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="data.js"></script>
+  <script src="media/video-config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
