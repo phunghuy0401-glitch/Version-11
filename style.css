@@ -710,3 +710,94 @@ h1, h2, h3, p { overflow-wrap: break-word; }
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   .heart-glyph, .letter-emblem, .sky-glow, .ambient-dot { animation: none !important; }
 }
+
+/* =========================================
+   19.11 — INTRO HEADING
+   Editorial heading above the film
+========================================= */
+
+.intro-heading {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto 30px;
+  text-align: center;
+}
+
+.intro-heading .eyebrow {
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.intro-heading #introTitle {
+  font-size: clamp(32px, 5vw, 54px);
+  line-height: 1.2;
+  letter-spacing: -.055em;
+}
+
+.intro-heading .lead {
+  max-width: none;
+  margin: 12px auto 0;
+}
+
+.intro-heading-divider {
+  display: flex;
+  max-width: 180px;
+  align-items: center;
+  gap: 12px;
+  margin: 19px auto 0;
+  color: #74ACCA;
+}
+
+.intro-heading-divider span {
+  height: 1px;
+  flex: 1;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(80,151,190,.4)
+  );
+}
+
+.intro-heading-divider span:last-child {
+  transform: scaleX(-1);
+}
+
+.intro-heading-divider i {
+  font-size: 12px;
+  font-style: normal;
+}
+
+/* Local video preview */
+.media-local-preview {
+  display: block;
+  width: 100%;
+  max-height: 320px;
+  margin-top: 12px;
+  border-radius: 14px;
+  background: #102A3D;
+  object-fit: contain;
+}
+
+.media-local-preview[hidden] {
+  display: none;
+}
+
+/* Mobile heading */
+@media (max-width: 699px) {
+  .intro-heading {
+    margin-bottom: 20px;
+  }
+
+  .intro-heading #introTitle {
+    font-size: clamp(30px, 8vw, 39px);
+  }
+
+  .intro-heading .lead {
+    font-size: 11px;
+  }
+
+  .intro-heading-divider {
+    margin-top: 14px;
+  }
+}
+
